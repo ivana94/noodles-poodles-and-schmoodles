@@ -35,13 +35,22 @@ var WorldScene = new Phaser.Class({
     },
     preload: function() {},
     create: function() {
-        // create your world here
+
+        // ---------------- the map ----------------
+
         var map = this.make.tilemap({key: 'map'});
         var tiles = map.addTilesetImage('spritesheet', 'tiles');
 
         var grass = map.createStaticLayer('Grass', tiles, 0, 0);
         var obstacles = map.createStaticLayer('Obstacles', tiles, 0, 0);
         obstacles.setCollisionByExclusion([-1]);
+
+
+
+
+
+
+        // ---------------- player ----------------
 
         // creating our player
         // (x-coord, y-coord, img resource, frame)
@@ -50,7 +59,118 @@ var WorldScene = new Phaser.Class({
         // make our person collide with stuff on map
         this.physics.world.bounds.width = map.widthInPixels;
         this.physics.world.bounds.height = map.heightInPixels;
+
+        // forces player to stay within bounds of
+        // the world!
         this.player.setCollideWorldBounds(true);
+
+        // allows us to move player with arrow keys
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+
+
+
+
+        // ---------------- camera ----------------
+
+        // make camera follow player as s/he
+        // traverses our map
+
+        // force camera to stay within bounds of map
+        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+
+        // makes camera follow player
+        this.cameras.main.startFollow(this.player);
+
+        // prevents tiles bleeding
+        // shows border lines on tiles.
+        this.cameras.main.roundPixels = true;
+
+
+
+
+
+
+
+
+        // ----------- animate player mvmts -----------
+
+
+        //  animation with key 'left', we don't need left and right as we will use one and flip the sprite
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('player', { frames: [1, 7, 1, 13]}),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        // animation with key 'right'
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('player', { frames: [1, 7, 1, 13] }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'up',
+            frames: this.anims.generateFrameNumbers('player', { frames: [2, 8, 2, 14]}),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('player', { frames: [ 0, 6, 0, 12 ] }),
+            frameRate: 10,
+            repeat: -1
+        });
+    },
+
+    update: function(time, delta) {
+
+
+
+        // ----------- player mvmt logic -----------
+
+        // set init v to 0
+        // bc player isn't moving!
+        this.player.body.setVelocity(0);
+
+        // Horizontal movement
+        if (this.cursors.left.isDown) {
+            this.player.body.setVelocityX(-80);
+        } else if (this.cursors.right.isDown) {
+            this.player.body.setVelocityX(80);
+        }
+
+        // Vertical movement
+        if (this.cursors.up.isDown) {
+            this.player.body.setVelocityY(-80);
+        } else if (this.cursors.down.isDown) {
+            this.player.body.setVelocityY(80);
+        }
+
+
+        // player walking animation
+        if (this.cursors.left.isDown) {
+            this.player.anims.play('left', true);
+            this.player.flipX = true;
+        }
+        else if (this.cursors.right.isDown) {
+            this.player.anims.play('right', true);
+            this.player.flipX = false;
+        }
+        else if (this.cursors.up.isDown) {
+            this.player.anims.play('up', true);
+        }
+        else if (this.cursors.down.isDown) {
+            this.player.anims.play('down', true);
+        }
+        else {
+            this.player.anims.stop();
+        }
+
+
+
     }
 });
 
