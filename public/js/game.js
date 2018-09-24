@@ -123,6 +123,48 @@ var WorldScene = new Phaser.Class({
             frameRate: 10,
             repeat: -1
         });
+
+        // make player collide with obstacles on map
+        this.physics.add.collider(this.player, obstacles);
+
+
+
+
+
+        // --------------- baddies ----------------
+
+        // create zones where we might encounter enemies
+        this.spawns = this.physics.add.group({ classType: Phaser.GameObjects.Zone });
+        for(var i = 0; i < 30; i++) {
+            var x = Phaser.Math.RND.between(0, this.physics.world.bounds.width);
+            var y = Phaser.Math.RND.between(0, this.physics.world.bounds.height);
+            // parameters are x, y, width, height
+            this.spawns.create(x, y, 20, 20);
+        }
+
+        // allow player and enemy zones to interact
+        // when this interaction happens we call the
+        // onMeetEnemy method
+        this.physics.add.overlap(this.player, this.spawns, this.onMeetEnemy, false, this);
+    },
+
+    // this method runs whenever player interacts
+    // with zone object
+    // where enemies might spawn
+    onMeetEnemy: function(player, zone) {
+
+        // we move the zone to some other location
+        zone.x = Phaser.Math.RND.between(0, this.physics.world.bounds.width);
+        zone.y = Phaser.Math.RND.between(0, this.physics.world.bounds.height);
+
+        // shake the world when zone & player
+        // interact
+        this.cameras.main.shake(300);
+        // this.cameras.main.flash(100);
+        // this.cameras.main.fade(10);
+        // this.cameras.main.fade(0);
+
+        // start battle
     },
 
     update: function(time, delta) {
@@ -186,7 +228,8 @@ var config = {
         arcade: {
             gravity: {
                 y: 0
-            }
+            },
+            debug: true
         }
     },
     scene: [BootScene, WorldScene]
